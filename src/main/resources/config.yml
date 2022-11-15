@@ -1,0 +1,29 @@
+allowed-on-all-worlds: false
+
+# If "allowed-on-all-worlds" is true, this list works like "blocked-worlds".
+allowed-worlds:
+  - farm
+
+# Configuration for features
+auto-plant:
+  enabled: true
+  mythic-type: "Auto-plant"
+  tick-rate: 5
+  plant-radius: 5
+  grow-radius: 2
+auto-grow:
+  enabled: true
+  mythic-type: "Auto-grow"
+  tick-rate: 5
+  radius: 5
+area-break:
+  enabled: true
+  mythic-type: "Area-break"
+  radius: 2
+  prevent-auto-plant-ticks: 600
+area-collect:
+  enabled: true
+  mythic-type: "Area-collect"
+  tick-rate: 1
+  radius: 7
+  unfollow-if-full-inventory: true
