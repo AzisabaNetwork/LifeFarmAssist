@@ -4,6 +4,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 // tick-rate is not used
 public class AreaBreakArmorConfig extends BaseArmorConfig {
+    public static final String TYPE = "area-break";
     private final int radius;
     private final int preventAutoPlantTicks;
 

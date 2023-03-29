@@ -14,40 +14,59 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class AreaBreakListener implements Listener {
     public static final Set<BlockPos> RECENTLY_BROKEN = new HashSet<>();
-    private final AreaBreakArmorConfig config;
+    private final List<AreaBreakArmorConfig> configList;
 
     public AreaBreakListener(LifeFarmAssist plugin) {
-        this.config = plugin.getFarmAssistConfig().getAreaBreakArmorConfig();
+        this.configList = plugin.getFarmAssistConfig().getListOfType(AreaBreakArmorConfig.class);
     }
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
-        if (!config.isEnabled() || config.getRadius() == 0) return;
-        if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(e.getPlayer().getWorld().getName()) ||
-                !PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
+        if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(e.getPlayer().getWorld().getName())) {
             return;
         }
         BlockPos center = new BlockPos(e.getBlock().getLocation());
-        addRecentlyBroken(center);
-        for (BlockPos pos : CuboidRegion.radius(center, config.getRadius())) {
-            Block block = pos.getBlock();
-            if (!pos.equals(center) && block.getBlockData() instanceof Ageable) {
+        if (RECENTLY_BROKEN.contains(center)) {
+            // prevent loop
+            return;
+        }
+        for (AreaBreakArmorConfig config : configList) {
+            if (!config.isEnabled() || config.getRadius() == 0) continue;
+            if (!PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
+                continue;
+            }
+            addRecentlyBroken(center, config.getPreventAutoPlantTicks());
+            for (BlockPos pos : CuboidRegion.radius(center, config.getRadius())) {
+                Block block = pos.getBlock();
+                if (pos.equals(center) || !(block.getBlockData() instanceof Ageable)) {
+                    continue;
+                }
+                Ageable ageable = (Ageable) block.getBlockData();
+                if (ageable.getMaximumAge() != ageable.getAge()) {
+                    continue;
+                }
+                BlockBreakEvent event = new BlockBreakEvent(block, e.getPlayer());
+                Bukkit.getPluginManager().callEvent(event);
+                if (event.isCancelled()) {
+                    continue;
+                }
                 block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
-                addRecentlyBroken(pos);
+                addRecentlyBroken(pos, config.getPreventAutoPlantTicks());
             }
         }
     }
 
-    public void addRecentlyBroken(@NotNull BlockPos pos) {
+    public void addRecentlyBroken(@NotNull BlockPos pos, int preventAutoPlantTicks) {
         RECENTLY_BROKEN.add(pos);
         Bukkit.getScheduler().runTaskLaterAsynchronously(
                 LifeFarmAssist.getInstance(),
                 () -> Bukkit.getScheduler().runTask(LifeFarmAssist.getInstance(), () -> RECENTLY_BROKEN.remove(pos)),
-                config.getPreventAutoPlantTicks() - 1
+                Math.max(0, preventAutoPlantTicks - 1)
         );
     }
 }

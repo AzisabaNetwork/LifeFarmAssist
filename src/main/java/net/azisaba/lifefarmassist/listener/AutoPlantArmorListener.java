@@ -14,10 +14,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class AutoPlantArmorListener extends BaseArmorListener<AutoPlantArmorConfig> {
     public AutoPlantArmorListener(@NotNull LifeFarmAssist plugin) {
-        super(plugin.getFarmAssistConfig().getAutoPlantArmorConfig());
+        super(plugin.getFarmAssistConfig().getListOfType(AutoPlantArmorConfig.class));
     }
 
-    public void onMove(@NotNull Player player) {
+    @Override
+    public void onMove(@NotNull AutoPlantArmorConfig config, @NotNull Player player) {
         BlockPos center = new BlockPos(player.getLocation());
         int modY = 0;
         if (center.getBlock().getType() == Material.FARMLAND) {
@@ -30,6 +31,9 @@ public class AutoPlantArmorListener extends BaseArmorListener<AutoPlantArmorConf
             Block block = pos.getBlock();
             if (block.getType().isAir() && !AreaBreakListener.RECENTLY_BROKEN.contains(pos)) {
                 block.setType(Material.WHEAT);
+            }
+            if (config.getGrowRadius() <= 0) {
+                continue;
             }
             BlockData blockData = block.getBlockData();
             if (!(blockData instanceof Ageable)) {

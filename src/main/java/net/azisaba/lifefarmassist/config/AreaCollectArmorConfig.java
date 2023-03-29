@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public class AreaCollectArmorConfig extends BaseArmorConfig {
+    public static final String TYPE = "area-collect";
     private final int radius;
     private final boolean unfollowIfFullInventory;
 

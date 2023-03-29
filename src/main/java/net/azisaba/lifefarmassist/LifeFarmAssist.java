@@ -1,5 +1,6 @@
 package net.azisaba.lifefarmassist;
 
+import net.azisaba.lifefarmassist.config.AreaCollectArmorConfig;
 import net.azisaba.lifefarmassist.config.FarmAssistConfig;
 import net.azisaba.lifefarmassist.listener.AreaBreakListener;
 import net.azisaba.lifefarmassist.listener.AutoGrowArmorListener;
@@ -24,7 +25,7 @@ public final class LifeFarmAssist extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         this.config = new FarmAssistConfig(getConfig());
-        this.config.getAreaCollectArmorConfig().startTask();
+        this.config.getListOfType(AreaCollectArmorConfig.class).forEach(AreaCollectArmorConfig::startTask);
         Bukkit.getPluginManager().registerEvents(new AutoPlantArmorListener(this), this);
         Bukkit.getPluginManager().registerEvents(new AutoGrowArmorListener(this), this);
         Bukkit.getPluginManager().registerEvents(new AreaBreakListener(this), this);

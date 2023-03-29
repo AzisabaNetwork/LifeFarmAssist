@@ -11,33 +11,37 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public abstract class BaseArmorListener<C extends BaseArmorConfig> implements Listener {
-    private final Map<UUID, Integer> tick = new HashMap<>();
-    protected final C config;
+    private final Map<String, Integer> tick = new HashMap<>();
+    protected final List<C> configList;
 
-    public BaseArmorListener(@NotNull C config) {
-        this.config = config;
+    public BaseArmorListener(@NotNull List<C> configList) {
+        this.configList = configList;
     }
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
-        if (!config.isEnabled()) return;
-        int prevTick = tick.getOrDefault(e.getPlayer().getUniqueId(), 0);
+        int index = 0;
         int currTick = ServerUtil.getCurrentTick();
-        if (currTick - prevTick < config.getTickRate()) {
-            return;
-        }
-        tick.put(e.getPlayer().getUniqueId(), currTick);
+        for (C config : configList) {
+            if (!config.isEnabled()) continue;
+            int prevTick = tick.getOrDefault(e.getPlayer().getUniqueId() + "_" + index, 0);
+            if (currTick - prevTick < config.getTickRate()) {
+                continue;
+            }
+            tick.put(e.getPlayer().getUniqueId() + "_" + index, currTick);
 
-        if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(e.getPlayer().getWorld().getName()) ||
-                !PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
-            return;
+            if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(e.getPlayer().getWorld().getName()) ||
+                    !PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
+                continue;
+            }
+            onMove(config, e.getPlayer());
+            index++;
         }
-        onMove(e.getPlayer());
     }
 
-    public abstract void onMove(@NotNull Player player);
+    public abstract void onMove(@NotNull C config, @NotNull Player player);
 }

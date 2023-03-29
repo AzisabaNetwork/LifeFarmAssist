@@ -1,27 +1,47 @@
 package net.azisaba.lifefarmassist.config;
 
+import net.azisaba.lifefarmassist.util.MapBuilder;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FarmAssistConfig {
+    public static final Map<String, Function<ConfigurationSection, BaseArmorConfig>> TYPES =
+            Collections.unmodifiableMap(
+                    new MapBuilder<String, Function<ConfigurationSection, BaseArmorConfig>>()
+                            .put(AutoPlantArmorConfig.TYPE, AutoPlantArmorConfig::new)
+                            .put(AutoGrowArmorConfig.TYPE, AutoGrowArmorConfig::new)
+                            .put(AreaBreakArmorConfig.TYPE, AreaBreakArmorConfig::new)
+                            .put(AreaCollectArmorConfig.TYPE, AreaCollectArmorConfig::new)
+                            .build()
+            );
     private final boolean allowedOnAllWorlds;
     private final Set<String> allowedWorlds;
-    private final AutoPlantArmorConfig autoPlantArmorConfig;
-    private final AutoGrowArmorConfig autoGrowArmorConfig;
-    private final AreaBreakArmorConfig areaBreakArmorConfig;
-    private final AreaCollectArmorConfig areaCollectArmorConfig;
+    private final List<BaseArmorConfig> list = new ArrayList<>();
 
     public FarmAssistConfig(@NotNull ConfigurationSection section) {
         this.allowedOnAllWorlds = section.getBoolean("allowed-on-all-worlds", false);
         this.allowedWorlds = new HashSet<>(section.getStringList("allowed-worlds"));
-        this.autoPlantArmorConfig = new AutoPlantArmorConfig(getSection(section, "auto-plant"));
-        this.autoGrowArmorConfig = new AutoGrowArmorConfig(getSection(section, "auto-grow"));
-        this.areaBreakArmorConfig = new AreaBreakArmorConfig(getSection(section, "area-break"));
-        this.areaCollectArmorConfig = new AreaCollectArmorConfig(getSection(section, "area-collect"));
+        for (Map<?, ?> map : section.getMapList("list")) {
+            MemoryConfiguration subSection = new MemoryConfiguration();
+            map.forEach((key, value) -> subSection.set(key.toString(), value));
+            String type = subSection.getString("type", "<not set>");
+            Function<ConfigurationSection, ? extends BaseArmorConfig> constructor = TYPES.get(type);
+            if (constructor == null) {
+                throw new IllegalArgumentException("Unknown type: " + type);
+            }
+            list.add(Objects.requireNonNull(constructor.apply(subSection), "constructor of " + type + " returned null"));
+        }
     }
 
     public boolean isAllowedOnAllWorlds() {
@@ -33,24 +53,12 @@ public class FarmAssistConfig {
         return allowedWorlds;
     }
 
-    @NotNull
-    public AutoPlantArmorConfig getAutoPlantArmorConfig() {
-        return autoPlantArmorConfig;
+    public @NotNull List<@NotNull BaseArmorConfig> getList() {
+        return list;
     }
 
-    @NotNull
-    public AutoGrowArmorConfig getAutoGrowArmorConfig() {
-        return autoGrowArmorConfig;
-    }
-
-    @NotNull
-    public AreaBreakArmorConfig getAreaBreakArmorConfig() {
-        return areaBreakArmorConfig;
-    }
-
-    @NotNull
-    public AreaCollectArmorConfig getAreaCollectArmorConfig() {
-        return areaCollectArmorConfig;
+    public <T extends BaseArmorConfig> @NotNull List<@NotNull T> getListOfType(@NotNull Class<T> clazz) {
+        return list.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
     }
 
     public boolean isAllowedWorld(@NotNull String worldName) {
@@ -60,14 +68,5 @@ public class FarmAssistConfig {
         } else {
             return getAllowedWorlds().contains(worldName);
         }
-    }
-
-    @NotNull
-    private static ConfigurationSection getSection(@NotNull ConfigurationSection section, @NotNull String key) {
-        ConfigurationSection child = section.getConfigurationSection(key);
-        if (child != null) {
-            return child;
-        }
-        return new MemoryConfiguration();
     }
 }

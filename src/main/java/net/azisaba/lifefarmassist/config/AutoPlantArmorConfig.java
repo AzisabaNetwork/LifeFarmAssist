@@ -4,6 +4,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 
 public class AutoPlantArmorConfig extends BaseArmorConfig {
+    public static final String TYPE = "auto-plant";
     private final int plantRadius;
     private final int growRadius;
 

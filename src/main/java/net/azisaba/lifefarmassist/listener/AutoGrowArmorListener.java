@@ -11,18 +11,22 @@ import org.jetbrains.annotations.NotNull;
 
 public class AutoGrowArmorListener extends BaseArmorListener<AutoGrowArmorConfig> {
     public AutoGrowArmorListener(@NotNull LifeFarmAssist plugin) {
-        super(plugin.getFarmAssistConfig().getAutoGrowArmorConfig());
+        super(plugin.getFarmAssistConfig().getListOfType(AutoGrowArmorConfig.class));
     }
 
-    public void onMove(@NotNull Player player) {
+    @Override
+    public void onMove(@NotNull AutoGrowArmorConfig config, @NotNull Player player) {
         BlockPos center = new BlockPos(player.getLocation());
         for (BlockPos pos : CuboidRegion.radius(center, config.getRadius())) {
+            if (config.getChance() <= Math.random()) {
+                continue;
+            }
             Block block = pos.getBlock();
             if (!(block.getBlockData() instanceof Ageable)) {
                 continue;
             }
             Ageable ageable = (Ageable) block.getBlockData();
-            ageable.setAge(ageable.getMaximumAge());
+            ageable.setAge(Math.min(ageable.getAge() + 1, ageable.getMaximumAge()));
             block.setBlockData(ageable);
         }
     }
