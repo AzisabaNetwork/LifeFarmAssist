@@ -4,6 +4,18 @@ allowed-on-all-worlds: false
 allowed-worlds:
   - farm
 
+ticket:
+- chance: 0.2 # 20% or 1 in 5
+  mythic-type: LFA_Ticket_Common
+- chance: 0.1 # 10% or 1 in 10
+  mythic-type: LFA_Ticket_Uncommon
+- chance: 0.05 # 5% or 1 in 20
+  mythic-type: LFA_Ticket_Rare
+- chance: 0.01 # 1% or 1 in 100
+  mythic-type: LFA_Ticket_Epic
+- chance: 0.0001 # 0.01% or 1 in 10000
+  mythic-type: LFA_Ticket_Legendary
+
 # Configuration for features
 list:
 - type: auto-plant

@@ -27,11 +27,19 @@ public class FarmAssistConfig {
             );
     private final boolean allowedOnAllWorlds;
     private final Set<String> allowedWorlds;
+    private final List<TicketConfig> ticket = new ArrayList<>();
     private final List<BaseArmorConfig> list = new ArrayList<>();
 
     public FarmAssistConfig(@NotNull ConfigurationSection section) {
         this.allowedOnAllWorlds = section.getBoolean("allowed-on-all-worlds", false);
         this.allowedWorlds = new HashSet<>(section.getStringList("allowed-worlds"));
+        for (Map<?, ?> map : section.getMapList("ticket")) {
+            MemoryConfiguration subSection = new MemoryConfiguration();
+            map.forEach((key, value) -> subSection.set(key.toString(), value));
+            double chance = subSection.getDouble("chance", 0.0);
+            String mythicType = subSection.getString("mythic-type", null);
+            ticket.add(new TicketConfig(chance, Objects.requireNonNull(mythicType, "mythic-type is not set")));
+        }
         for (Map<?, ?> map : section.getMapList("list")) {
             MemoryConfiguration subSection = new MemoryConfiguration();
             map.forEach((key, value) -> subSection.set(key.toString(), value));
@@ -51,6 +59,10 @@ public class FarmAssistConfig {
     @NotNull
     public Set<String> getAllowedWorlds() {
         return allowedWorlds;
+    }
+
+    public @NotNull List<@NotNull TicketConfig> getTicket() {
+        return ticket;
     }
 
     public @NotNull List<@NotNull BaseArmorConfig> getList() {
