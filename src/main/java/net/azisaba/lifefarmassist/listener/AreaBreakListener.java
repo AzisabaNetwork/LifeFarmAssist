@@ -50,9 +50,11 @@ public class AreaBreakListener implements Listener {
                 if (ageable.getMaximumAge() != ageable.getAge()) {
                     continue;
                 }
+                RECENTLY_BROKEN.add(pos);
                 BlockBreakEvent event = new BlockBreakEvent(block, e.getPlayer());
                 Bukkit.getPluginManager().callEvent(event);
                 if (event.isCancelled()) {
+                    RECENTLY_BROKEN.remove(pos);
                     continue;
                 }
                 block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
@@ -63,7 +65,7 @@ public class AreaBreakListener implements Listener {
 
     public void addRecentlyBroken(@NotNull BlockPos pos, int preventAutoPlantTicks) {
         RECENTLY_BROKEN.add(pos);
-        Bukkit.getScheduler().runTaskLaterAsynchronously(
+        Bukkit.getScheduler().runTaskLater(
                 LifeFarmAssist.getInstance(),
                 () -> Bukkit.getScheduler().runTask(LifeFarmAssist.getInstance(), () -> RECENTLY_BROKEN.remove(pos)),
                 Math.max(0, preventAutoPlantTicks - 1)
