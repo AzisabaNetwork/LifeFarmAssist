@@ -6,6 +6,7 @@ import net.azisaba.lifefarmassist.util.PlayerUtil;
 import net.azisaba.lifefarmassist.util.ServerUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ public abstract class BaseArmorListener<C extends BaseArmorConfig> implements Li
         this.configList = configList;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMove(PlayerMoveEvent e) {
         int index = 0;
         int currTick = ServerUtil.getCurrentTick();
