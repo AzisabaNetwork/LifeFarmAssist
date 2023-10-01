@@ -21,9 +21,11 @@ import java.util.Set;
 public class AreaBreakListener implements Listener {
     public static final Set<BlockPos> RECENTLY_BROKEN = new HashSet<>();
     private final List<AreaBreakArmorConfig> configList;
+    private final LifeFarmAssist plugin;
 
     public AreaBreakListener(LifeFarmAssist plugin) {
         this.configList = plugin.getFarmAssistConfig().getListOfType(AreaBreakArmorConfig.class);
+        this.plugin = plugin;
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -36,8 +38,9 @@ public class AreaBreakListener implements Listener {
             // prevent loop
             return;
         }
+        int delay = 0;
         for (AreaBreakArmorConfig config : configList) {
-            if (!config.isEnabled() || config.getRadius() == 0) continue;
+            if (!config.isEnabled() || config.getRadius() == 0 || delay > 0) continue;
             if (!PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
                 continue;
             }
@@ -52,14 +55,16 @@ public class AreaBreakListener implements Listener {
                     continue;
                 }
                 RECENTLY_BROKEN.add(pos);
-                BlockBreakEvent event = new BlockBreakEvent(block, e.getPlayer());
-                Bukkit.getPluginManager().callEvent(event);
-                if (event.isCancelled()) {
-                    RECENTLY_BROKEN.remove(pos);
-                    continue;
-                }
-                block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
-                addRecentlyBroken(pos, config.getPreventAutoPlantTicks());
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    BlockBreakEvent event = new BlockBreakEvent(block, e.getPlayer());
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.isCancelled()) {
+                        RECENTLY_BROKEN.remove(pos);
+                    } else {
+                        block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
+                        addRecentlyBroken(pos, config.getPreventAutoPlantTicks());
+                    }
+                }, (int) (++delay / 2.0));
             }
         }
     }
