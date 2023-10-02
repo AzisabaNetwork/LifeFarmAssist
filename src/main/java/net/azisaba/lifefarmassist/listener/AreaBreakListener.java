@@ -17,11 +17,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AreaBreakListener implements Listener {
     public static final Set<BlockPos> RECENTLY_BROKEN = new HashSet<>();
     private final List<AreaBreakArmorConfig> configList;
     private final LifeFarmAssist plugin;
+    private final AtomicBoolean processing = new AtomicBoolean();
 
     public AreaBreakListener(LifeFarmAssist plugin) {
         this.configList = plugin.getFarmAssistConfig().getListOfType(AreaBreakArmorConfig.class);
@@ -30,6 +32,7 @@ public class AreaBreakListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
+        if (processing.get()) return; // prevent loop
         if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(e.getPlayer().getWorld().getName())) {
             return;
         }
@@ -56,8 +59,11 @@ public class AreaBreakListener implements Listener {
                 }
                 RECENTLY_BROKEN.add(pos);
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    RECENTLY_BROKEN.add(pos);
                     BlockBreakEvent event = new BlockBreakEvent(block, e.getPlayer());
+                    processing.set(true);
                     Bukkit.getPluginManager().callEvent(event);
+                    processing.set(false);
                     if (event.isCancelled()) {
                         RECENTLY_BROKEN.remove(pos);
                     } else {
