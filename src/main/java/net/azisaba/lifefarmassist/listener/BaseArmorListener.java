@@ -25,22 +25,21 @@ public abstract class BaseArmorListener<C extends BaseArmorConfig> implements Li
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onMove(PlayerMoveEvent e) {
-        int index = 0;
         int currTick = ServerUtil.getCurrentTick();
-        for (C config : configList) {
+        for (int i = 0; i < configList.size(); i++) {
+            C config = configList.get(i);
             if (!config.isEnabled()) continue;
-            int prevTick = tick.getOrDefault(e.getPlayer().getUniqueId() + "_" + index, 0);
+            int prevTick = tick.getOrDefault(e.getPlayer().getUniqueId() + "_" + i, 0);
             if (currTick - prevTick < config.getTickRate()) {
                 continue;
             }
-            tick.put(e.getPlayer().getUniqueId() + "_" + index, currTick);
+            tick.put(e.getPlayer().getUniqueId() + "_" + i, currTick);
 
             if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(e.getPlayer().getWorld().getName()) ||
                     !PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
                 continue;
             }
             onMove(config, e.getPlayer());
-            index++;
         }
     }
 
