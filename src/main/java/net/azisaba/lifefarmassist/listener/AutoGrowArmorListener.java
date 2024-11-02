@@ -4,6 +4,7 @@ import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.AutoGrowArmorConfig;
 import net.azisaba.lifefarmassist.region.BlockPos;
 import net.azisaba.lifefarmassist.region.CuboidRegion;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Player;
@@ -17,6 +18,9 @@ public class AutoGrowArmorListener extends BaseArmorListener<AutoGrowArmorConfig
     @Override
     public void onMove(@NotNull AutoGrowArmorConfig config, @NotNull Player player) {
         BlockPos center = new BlockPos(player.getLocation());
+        if (center.getBlock().getType() == Material.FARMLAND) {
+            center = center.add(0, 1, 0);
+        }
         for (BlockPos pos : CuboidRegion.radius(center, config.getRadius())) {
             if (config.getChance() <= Math.random()) {
                 continue;
