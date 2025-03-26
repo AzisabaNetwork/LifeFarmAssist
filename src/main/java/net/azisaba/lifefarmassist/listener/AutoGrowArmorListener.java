@@ -21,12 +21,13 @@ public class AutoGrowArmorListener extends BaseArmorListener<AutoGrowArmorConfig
         if (center.getBlock().getType() == Material.FARMLAND) {
             center = center.add(0, 1, 0);
         }
+
         for (BlockPos pos : CuboidRegion.radius(center, config.getRadius())) {
-            if (config.getChance() <= Math.random()) {
-                continue;
-            }
             Block block = pos.getBlock();
             if (!(block.getBlockData() instanceof Ageable)) {
+                continue;
+            }
+            if (config.getChance() <= Math.random()) {
                 continue;
             }
             Ageable ageable = (Ageable) block.getBlockData();
