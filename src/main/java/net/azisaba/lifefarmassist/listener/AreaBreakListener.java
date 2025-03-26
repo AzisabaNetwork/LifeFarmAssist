@@ -23,7 +23,6 @@ public class AreaBreakListener implements Listener {
     public static final Set<BlockPos> RECENTLY_BROKEN = new HashSet<>();
     private final List<AreaBreakArmorConfig> configList;
     private final LifeFarmAssist plugin;
-    private final AtomicBoolean processing = new AtomicBoolean();
 
     public AreaBreakListener(LifeFarmAssist plugin) {
         this.configList = plugin.getFarmAssistConfig().getListOfType(AreaBreakArmorConfig.class);
@@ -32,7 +31,6 @@ public class AreaBreakListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
-        if (processing.get()) return; // prevent loop
         if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(e.getPlayer().getWorld().getName())) {
             return;
         }
@@ -43,11 +41,12 @@ public class AreaBreakListener implements Listener {
         }
         int delay = 0;
         for (AreaBreakArmorConfig config : configList) {
-            if (!config.isEnabled() || config.getRadius() == 0 || delay > 0) continue;
+            if(delay > 0) break; // TODO: check this
+            if (!config.isEnabled() || config.getRadius() == 0) continue;
             if (!PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
                 continue;
             }
-            addRecentlyBroken(center, config.getPreventAutoPlantTicks());
+//            addRecentlyBroken(center, config.getPreventAutoPlantTicks());
             for (BlockPos pos : CuboidRegion.radius(center, config.getRadius())) {
                 Block block = pos.getBlock();
                 if (pos.equals(center) || !(block.getBlockData() instanceof Ageable)) {
@@ -59,11 +58,8 @@ public class AreaBreakListener implements Listener {
                 }
                 RECENTLY_BROKEN.add(pos);
                 Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    RECENTLY_BROKEN.add(pos);
                     BlockBreakEvent event = new BlockBreakEvent(block, e.getPlayer());
-                    processing.set(true);
                     Bukkit.getPluginManager().callEvent(event);
-                    processing.set(false);
                     if (event.isCancelled()) {
                         RECENTLY_BROKEN.remove(pos);
                     } else {
@@ -76,10 +72,9 @@ public class AreaBreakListener implements Listener {
     }
 
     public void addRecentlyBroken(@NotNull BlockPos pos, int preventAutoPlantTicks) {
-        RECENTLY_BROKEN.add(pos);
-        Bukkit.getScheduler().runTaskLater(
+        Bukkit.getScheduler().runTaskLaterAsynchronously(
                 LifeFarmAssist.getInstance(),
-                () -> Bukkit.getScheduler().runTask(LifeFarmAssist.getInstance(), () -> RECENTLY_BROKEN.remove(pos)),
+                () -> RECENTLY_BROKEN.remove(pos),
                 Math.max(0, preventAutoPlantTicks - 1)
         );
     }
