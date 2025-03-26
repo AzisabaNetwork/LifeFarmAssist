@@ -6,6 +6,8 @@ import net.azisaba.lifefarmassist.region.BlockPos;
 import net.azisaba.lifefarmassist.region.CuboidRegion;
 import net.azisaba.lifefarmassist.util.PlayerUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.event.EventHandler;
@@ -63,7 +65,13 @@ public class AreaBreakListener implements Listener {
                     if (event.isCancelled()) {
                         RECENTLY_BROKEN.remove(pos);
                     } else {
-                        block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
+                        // TODO: check this
+                        Location dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
+                        World world = block.getWorld();
+
+                        block.getDrops(e.getPlayer().getInventory().getItemInMainHand()).forEach( stack -> {
+                            world.dropItemNaturally(dropLocation, stack);
+                        });
                         addRecentlyBroken(pos, config.getPreventAutoPlantTicks());
                     }
                 }, (int) (++delay / 2.0));
