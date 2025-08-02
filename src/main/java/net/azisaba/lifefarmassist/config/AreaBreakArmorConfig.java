@@ -7,11 +7,13 @@ public class AreaBreakArmorConfig extends BaseArmorConfig {
     public static final String TYPE = "area-break";
     private final int radius;
     private final int preventAutoPlantTicks;
+    private final boolean verticalDestruction;
 
     public AreaBreakArmorConfig(ConfigurationSection section) {
         super(section);
         this.radius = Math.max(0, section.getInt("radius", 2));
         this.preventAutoPlantTicks = Math.max(0, section.getInt("prevent-auto-plant-ticks", 600));
+        this.verticalDestruction = section.getBoolean("vertical-destruction", true);
     }
 
     public int getRadius() {
@@ -20,5 +22,9 @@ public class AreaBreakArmorConfig extends BaseArmorConfig {
 
     public int getPreventAutoPlantTicks() {
         return preventAutoPlantTicks;
+    }
+
+    public boolean isVerticalDestruction() {
+        return verticalDestruction;
     }
 }

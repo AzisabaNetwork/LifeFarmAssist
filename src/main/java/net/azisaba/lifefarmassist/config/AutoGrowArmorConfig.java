@@ -7,11 +7,13 @@ public class AutoGrowArmorConfig extends BaseArmorConfig {
     public static final String TYPE = "auto-grow";
     private final int radius;
     private final double chance;
+    private final boolean verticalGrowth;
 
     public AutoGrowArmorConfig(@NotNull ConfigurationSection section) {
         super(section);
         this.radius = Math.max(0, section.getInt("radius", 5));
         this.chance = Math.max(0, section.getDouble("chance", 0.2));
+        this.verticalGrowth = section.getBoolean("vertical-growth", true);
     }
 
     public int getRadius() {
@@ -20,5 +22,9 @@ public class AutoGrowArmorConfig extends BaseArmorConfig {
 
     public double getChance() {
         return chance;
+    }
+
+    public boolean isVerticalGrowth() {
+        return verticalGrowth;
     }
 }

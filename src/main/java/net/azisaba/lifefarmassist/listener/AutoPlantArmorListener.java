@@ -4,6 +4,7 @@ import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.AutoPlantArmorConfig;
 import net.azisaba.lifefarmassist.region.BlockPos;
 import net.azisaba.lifefarmassist.region.CuboidRegion;
+import net.azisaba.lifefarmassist.region.Region;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -24,7 +25,12 @@ public class AutoPlantArmorListener extends BaseArmorListener<AutoPlantArmorConf
         if (center.getBlock().getType() == Material.FARMLAND) {
             modY = 1;
         }
-        for (BlockPos pos : CuboidRegion.radiusIgnoreY(center.add(0, modY, 0), config.getPlantRadius())) {
+
+        BlockPos min = center.subtract(config.getPlantRadius(), config.getVerticalPlantRadius(), config.getPlantRadius());
+        BlockPos max = center.add(config.getPlantRadius(), config.getVerticalPlantRadius(), config.getPlantRadius());
+        Region region = new CuboidRegion(min, max);
+
+        for (BlockPos pos : region) {
             if (pos.add(BlockFace.DOWN).getBlock().getType() != Material.FARMLAND) {
                 continue;
             }

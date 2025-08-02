@@ -7,6 +7,7 @@ public class AutoPlantArmorConfig extends BaseArmorConfig {
     public static final String TYPE = "auto-plant";
     private final int plantRadius;
     private final int growRadius;
+    private final int verticalPlantRadius;
 
     public AutoPlantArmorConfig(@NotNull ConfigurationSection section) {
         super(section);
@@ -15,6 +16,7 @@ public class AutoPlantArmorConfig extends BaseArmorConfig {
         if (plantRadius < growRadius) {
             throw new IllegalArgumentException("plant-radius must be greater than or equal to grow-radius");
         }
+        this.verticalPlantRadius = Math.max(0, section.getInt("vertical-plant-radius", this.plantRadius));
     }
 
     public int getPlantRadius() {
@@ -23,5 +25,9 @@ public class AutoPlantArmorConfig extends BaseArmorConfig {
 
     public int getGrowRadius() {
         return growRadius;
+    }
+
+    public int getVerticalPlantRadius() {
+        return verticalPlantRadius;
     }
 }

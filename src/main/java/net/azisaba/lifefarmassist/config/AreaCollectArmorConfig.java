@@ -14,15 +14,21 @@ public class AreaCollectArmorConfig extends BaseArmorConfig {
     public static final String TYPE = "area-collect";
     private final int radius;
     private final boolean unfollowIfFullInventory;
+    private final int verticalCollectRadius;
 
     public AreaCollectArmorConfig(ConfigurationSection section) {
         super(section);
         this.radius = Math.max(0, section.getInt("radius", 5));
         this.unfollowIfFullInventory = section.getBoolean("unfollow-if-full-inventory", true);
+        this.verticalCollectRadius = Math.max(0, section.getInt("vertical-collect-radius", this.radius));
     }
 
     public int getRadius() {
         return radius;
+    }
+
+    public int getVerticalCollectRadius() {
+        return verticalCollectRadius;
     }
 
     public void startTask() {
@@ -35,7 +41,7 @@ public class AreaCollectArmorConfig extends BaseArmorConfig {
                         !PlayerUtil.wearingMythicItem(player, getMythicType())) {
                     continue;
                 }
-                for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), radius, radius, radius, entity -> entity instanceof Item)) {
+                for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), getRadius(), getVerticalCollectRadius(), getRadius(), entity -> entity instanceof Item)) {
                     Vector vec = new Vector(
                             player.getLocation().getX() - entity.getLocation().getX(),
                             player.getLocation().getY() + player.getEyeHeight() / 2.0 - entity.getLocation().getY(),

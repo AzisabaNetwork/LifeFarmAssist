@@ -4,6 +4,7 @@ import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.AreaBreakArmorConfig;
 import net.azisaba.lifefarmassist.region.BlockPos;
 import net.azisaba.lifefarmassist.region.CuboidRegion;
+import net.azisaba.lifefarmassist.region.Region;
 import net.azisaba.lifefarmassist.util.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -47,8 +48,16 @@ public class AreaBreakListener implements Listener {
             if (!PlayerUtil.wearingMythicItem(e.getPlayer(), config.getMythicType())) {
                 continue;
             }
+
+            Region region;
+            if (config.isVerticalDestruction()) {
+                region = CuboidRegion.radius(center, config.getRadius());
+            } else {
+                region = CuboidRegion.radiusIgnoreY(center, config.getRadius());
+            }
+
             addRecentlyBroken(center, config.getPreventAutoPlantTicks());
-            for (BlockPos pos : CuboidRegion.radius(center, config.getRadius())) {
+            for (BlockPos pos : region) {
                 Block block = pos.getBlock();
                 if (pos.equals(center) || !(block.getBlockData() instanceof Ageable)) {
                     continue;
