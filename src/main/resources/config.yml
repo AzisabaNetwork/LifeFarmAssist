@@ -5,42 +5,42 @@ allowed-worlds:
   - farm
 
 ticket:
-  - chance: 0.2 # 20% or 1 in 5
-    mythic-type: LFA_Ticket_Common
-  - chance: 0.1 # 10% or 1 in 10
-    mythic-type: LFA_Ticket_Uncommon
-  - chance: 0.05 # 5% or 1 in 20
-    mythic-type: LFA_Ticket_Rare
-  - chance: 0.01 # 1% or 1 in 100
-    mythic-type: LFA_Ticket_Epic
-  - chance: 0.0001 # 0.01% or 1 in 10000
-    mythic-type: LFA_Ticket_Legendary
+- chance: 0.2 # 20% or 1 in 5
+  mythic-type: LFA_Ticket_Common
+- chance: 0.1 # 10% or 1 in 10
+  mythic-type: LFA_Ticket_Uncommon
+- chance: 0.05 # 5% or 1 in 20
+  mythic-type: LFA_Ticket_Rare
+- chance: 0.01 # 1% or 1 in 100
+  mythic-type: LFA_Ticket_Epic
+- chance: 0.0001 # 0.01% or 1 in 10000
+  mythic-type: LFA_Ticket_Legendary
 
 # Configuration for features
 list:
-  - type: auto-plant
-    enabled: true
-    mythic-type: "Auto-plant"
-    tick-rate: 5
-    plant-radius: 5
-    grow-radius: 2
-    # vertical-plant-radius: 1
-  - type: auto-grow
-    enabled: true
-    mythic-type: "Auto-grow"
-    tick-rate: 5
-    radius: 5
-    # vertical-growth: true
-  - type: area-break
-    enabled: true
-    mythic-type: "Area-break"
-    radius: 2
-    prevent-auto-plant-ticks: 600
-    # vertical-destruction: true
-  - type: area-collect
-    enabled: true
-    mythic-type: "Area-collect"
-    tick-rate: 1
-    radius: 7
-    unfollow-if-full-inventory: true
-    # vertical-collect-radius: 0
+- type: auto-plant
+  enabled: true
+  mythic-type: "Auto-plant"
+  tick-rate: 5
+  plant-radius: 5
+  grow-radius: 2
+  # vertical-plant-radius: 1
+- type: auto-grow
+  enabled: true
+  mythic-type: "Auto-grow"
+  tick-rate: 5
+  radius: 5
+  # vertical-growth: true
+- type: area-break
+  enabled: true
+  mythic-type: "Area-break"
+  radius: 2
+  prevent-auto-plant-ticks: 600
+  # vertical-destruction: true
+- type: area-collect
+  enabled: true
+  mythic-type: "Area-collect"
+  tick-rate: 1
+  radius: 7
+  unfollow-if-full-inventory: true
+  # vertical-collect-radius: 0
