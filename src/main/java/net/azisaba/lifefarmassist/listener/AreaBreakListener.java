@@ -7,17 +7,21 @@ import net.azisaba.lifefarmassist.region.CuboidRegion;
 import net.azisaba.lifefarmassist.region.Region;
 import net.azisaba.lifefarmassist.util.PlayerUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
+import xyz.acrylicstyle.storageBox.utils.StorageBox;
+import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AreaBreakListener implements Listener {
@@ -76,7 +80,17 @@ public class AreaBreakListener implements Listener {
                     if (event.isCancelled()) {
                         RECENTLY_BROKEN.remove(pos);
                     } else {
-                        block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
+                        if (plugin.getFarmAssistConfig().isDropsAddToInventory()) {
+                            Collection<ItemStack> drops = block.getDrops(e.getPlayer().getInventory().getItemInMainHand());
+                            block.setType(Material.AIR);
+                            if (plugin.getFarmAssistConfig().isStorageBoxEnabled()) {
+                                addToStorageOrInventory(e.getPlayer(), drops);
+                            } else {
+                                e.getPlayer().getInventory().addItem(drops.toArray(new ItemStack[0]));
+                            }
+                        } else {
+                            block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
+                        }
                         addRecentlyBroken(pos, config.getPreventAutoPlantTicks());
                     }
                 }, (int) (++delay / 2.0));
@@ -91,5 +105,52 @@ public class AreaBreakListener implements Listener {
                 () -> Bukkit.getScheduler().runTask(LifeFarmAssist.getInstance(), () -> RECENTLY_BROKEN.remove(pos)),
                 Math.max(0, preventAutoPlantTicks - 1)
         );
+    }
+
+    private void addToStorageOrInventory(Player player, Collection<ItemStack> drops) {
+        PlayerInventory inventory = player.getInventory();
+        List<ItemStack> remainingDrops = new ArrayList<>();
+
+        for (ItemStack drop : drops) {
+            if (drop == null || drop.getType().isAir()) continue;
+
+            long amountToStore = drop.getAmount();
+
+            Map.Entry<Integer, StorageBox> entry = StorageBoxUtils.getStorageBoxForType(inventory, drop);
+            if (entry != null) {
+                int slot = entry.getKey();
+                StorageBox box = entry.getValue();
+
+                box.setAmount(box.getAmount() + amountToStore);
+                inventory.setItem(slot, box.getItemStack());
+                amountToStore = 0;
+            }
+
+            if (amountToStore > 0) {
+                for (int i = 0; i < inventory.getSize(); i++) {
+                    if (amountToStore <= 0) break;
+                    ItemStack boxStack = inventory.getItem(i);
+                    if (boxStack == null) continue;
+
+                    StorageBox box = StorageBox.getStorageBox(boxStack);
+                    if (box != null && box.isAutoCollect() && box.isEmpty()) {
+                        box.importComponent(drop);
+                        inventory.setItem(i, box.getItemStack());
+                        amountToStore = 0;
+                        break;
+                    }
+                }
+            }
+
+            if (amountToStore > 0) {
+                ItemStack remaining = drop.clone();
+                remaining.setAmount((int) amountToStore);
+                remainingDrops.add(remaining);
+            }
+        }
+
+        if (!remainingDrops.isEmpty()) {
+            inventory.addItem(remainingDrops.toArray(new ItemStack[0]));
+        }
     }
 }

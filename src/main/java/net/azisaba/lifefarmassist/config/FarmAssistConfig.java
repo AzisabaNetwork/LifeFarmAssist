@@ -29,6 +29,8 @@ public class FarmAssistConfig {
     private final Set<String> allowedWorlds;
     private final List<TicketConfig> ticket = new ArrayList<>();
     private final List<BaseArmorConfig> list = new ArrayList<>();
+    private final boolean dropsAddToInventory;
+    private final boolean storageBoxEnabled;
 
     public FarmAssistConfig(@NotNull ConfigurationSection section) {
         this.allowedOnAllWorlds = section.getBoolean("allowed-on-all-worlds", false);
@@ -50,6 +52,8 @@ public class FarmAssistConfig {
             }
             list.add(Objects.requireNonNull(constructor.apply(subSection), "constructor of " + type + " returned null"));
         }
+        this.dropsAddToInventory = section.getBoolean("drop-settings.add-to-inventory", false);
+        this.storageBoxEnabled = section.getBoolean("drop-settings.storagebox", false);
     }
 
     public boolean isAllowedOnAllWorlds() {
@@ -80,5 +84,13 @@ public class FarmAssistConfig {
         } else {
             return getAllowedWorlds().contains(worldName);
         }
+    }
+
+    public boolean isDropsAddToInventory() {
+        return dropsAddToInventory;
+    }
+
+    public boolean isStorageBoxEnabled() {
+        return storageBoxEnabled;
     }
 }

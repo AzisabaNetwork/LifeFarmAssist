@@ -4,6 +4,11 @@ allowed-on-all-worlds: false
 allowed-worlds:
   - farm
 
+drop-settings:
+  add-to-inventory: false
+  # If "add-to-inventory" is true, drops are priority in StorageBox
+  storagebox: false
+
 ticket:
 - chance: 0.2 # 20% or 1 in 5
   mythic-type: LFA_Ticket_Common

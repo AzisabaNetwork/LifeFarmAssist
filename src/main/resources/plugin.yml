@@ -2,3 +2,6 @@ name: LifeFarmAssist
 version: '${project.version}'
 main: net.azisaba.lifefarmassist.LifeFarmAssist
 api-version: 1.15
+softdepend:
+  - MythicMobs
+  - StorageBox
