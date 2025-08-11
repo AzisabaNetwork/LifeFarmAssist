@@ -36,7 +36,7 @@ public class AreaCollectArmorConfig extends BaseArmorConfig {
         Bukkit.getScheduler().runTaskTimer(LifeFarmAssist.getInstance(), () -> {
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player.getGameMode() == GameMode.SPECTATOR) continue;
-                if (unfollowIfFullInventory && player.getInventory().firstEmpty() == -1) continue;
+                // if (unfollowIfFullInventory && player.getInventory().firstEmpty() == -1) continue;
                 if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(player.getWorld().getName()) ||
                         !PlayerUtil.wearingMythicItem(player, getMythicType())) {
                     continue;

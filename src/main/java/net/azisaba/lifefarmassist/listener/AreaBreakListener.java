@@ -1,5 +1,6 @@
 package net.azisaba.lifefarmassist.listener;
 
+import net.azisaba.itemstash.ItemStash;
 import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.AreaBreakArmorConfig;
 import net.azisaba.lifefarmassist.region.BlockPos;
@@ -86,7 +87,7 @@ public class AreaBreakListener implements Listener {
                             if (plugin.getFarmAssistConfig().isStorageBoxEnabled()) {
                                 addToStorageOrInventory(e.getPlayer(), drops);
                             } else {
-                                e.getPlayer().getInventory().addItem(drops.toArray(new ItemStack[0]));
+                                addItemsToPlayer(e.getPlayer(), drops);
                             }
                         } else {
                             block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
@@ -113,14 +114,11 @@ public class AreaBreakListener implements Listener {
 
         for (ItemStack drop : drops) {
             if (drop == null || drop.getType().isAir()) continue;
-
             long amountToStore = drop.getAmount();
-
             Map.Entry<Integer, StorageBox> entry = StorageBoxUtils.getStorageBoxForType(inventory, drop);
             if (entry != null) {
                 int slot = entry.getKey();
                 StorageBox box = entry.getValue();
-
                 box.setAmount(box.getAmount() + amountToStore);
                 inventory.setItem(slot, box.getItemStack());
                 amountToStore = 0;
@@ -128,7 +126,6 @@ public class AreaBreakListener implements Listener {
 
             if (amountToStore > 0) {
                 for (int i = 0; i < inventory.getSize(); i++) {
-                    if (amountToStore <= 0) break;
                     ItemStack boxStack = inventory.getItem(i);
                     if (boxStack == null) continue;
 
@@ -150,7 +147,31 @@ public class AreaBreakListener implements Listener {
         }
 
         if (!remainingDrops.isEmpty()) {
-            inventory.addItem(remainingDrops.toArray(new ItemStack[0]));
+            addItemsToPlayer(player, remainingDrops);
+        }
+    }
+
+    private void addItemsToPlayer(Player player, Collection<ItemStack> items) {
+        if (items == null || items.isEmpty()) return;
+        if (player.getInventory().firstEmpty() == -1) {
+            try {
+                ItemStash stash = ItemStash.getInstance();
+                for (ItemStack item : items) {
+                    stash.addItemToStash(player.getUniqueId(), item);
+                }
+            } catch (NoClassDefFoundError e) {
+            }
+        } else {
+            HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(items.toArray(new ItemStack[0]));
+            if (!overflow.isEmpty()) {
+                try {
+                    ItemStash stash = ItemStash.getInstance();
+                    for (ItemStack overflowItem : overflow.values()) {
+                        stash.addItemToStash(player.getUniqueId(), overflowItem);
+                    }
+                } catch (NoClassDefFoundError e) {
+                }
+            }
         }
     }
 }
