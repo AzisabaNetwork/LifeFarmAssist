@@ -31,6 +31,8 @@ public class AreaBreakListener implements Listener {
     private final LifeFarmAssist plugin;
     private final AtomicBoolean processing = new AtomicBoolean();
 
+    private static final int INVENTORY_THRESHOLD = LifeFarmAssist.getInstance().getConfig().getInt("drop-settings.inventory-threshold", 3);
+
     public AreaBreakListener(LifeFarmAssist plugin) {
         this.configList = plugin.getFarmAssistConfig().getListOfType(AreaBreakArmorConfig.class);
         this.plugin = plugin;
@@ -84,11 +86,7 @@ public class AreaBreakListener implements Listener {
                         if (plugin.getFarmAssistConfig().isDropsAddToInventory()) {
                             Collection<ItemStack> drops = block.getDrops(e.getPlayer().getInventory().getItemInMainHand());
                             block.setType(Material.AIR);
-                            if (plugin.getFarmAssistConfig().isStorageBoxEnabled()) {
-                                addToStorageOrInventory(e.getPlayer(), drops);
-                            } else {
-                                addItemsToPlayer(e.getPlayer(), drops);
-                            }
+                            handleDrops(e.getPlayer(), block, drops);
                         } else {
                             block.breakNaturally(e.getPlayer().getInventory().getItemInMainHand());
                         }
@@ -108,70 +106,38 @@ public class AreaBreakListener implements Listener {
         );
     }
 
-    private void addToStorageOrInventory(Player player, Collection<ItemStack> drops) {
-        PlayerInventory inventory = player.getInventory();
-        List<ItemStack> remainingDrops = new ArrayList<>();
-
+    private void handleDrops(Player player, Block block, Collection<ItemStack> drops) {
+        PlayerInventory inv = player.getInventory();
         for (ItemStack drop : drops) {
             if (drop == null || drop.getType().isAir()) continue;
-            long amountToStore = drop.getAmount();
-            Map.Entry<Integer, StorageBox> entry = StorageBoxUtils.getStorageBoxForType(inventory, drop);
-            if (entry != null) {
-                int slot = entry.getKey();
-                StorageBox box = entry.getValue();
-                box.setAmount(box.getAmount() + amountToStore);
-                inventory.setItem(slot, box.getItemStack());
-                amountToStore = 0;
+            ItemStack dropItem = new ItemStack(drop);
+            if (getEmptySlots(inv) > INVENTORY_THRESHOLD) {
+                HashMap<Integer, ItemStack> overflow = inv.addItem(dropItem);
+                if (overflow.isEmpty()) continue;
+                dropItem = overflow.get(0);
             }
-
-            if (amountToStore > 0) {
-                for (int i = 0; i < inventory.getSize(); i++) {
-                    ItemStack boxStack = inventory.getItem(i);
-                    if (boxStack == null) continue;
-
-                    StorageBox box = StorageBox.getStorageBox(boxStack);
-                    if (box != null && box.isAutoCollect() && box.isEmpty()) {
-                        box.importComponent(drop);
-                        inventory.setItem(i, box.getItemStack());
-                        amountToStore = 0;
-                        break;
-                    }
+            if (dropItem.getAmount() > 0 && plugin.getFarmAssistConfig().isStorageBoxEnabled()) {
+                Map.Entry<Integer, StorageBox> entry = StorageBoxUtils.getStorageBoxForType(inv, dropItem);
+                if (entry != null) {
+                    StorageBox box = entry.getValue();
+                    box.setAmount(box.getAmount() + drop.getAmount());
+                    inv.setItem(entry.getKey(), box.getItemStack());
+                    dropItem.setAmount(0);
                 }
             }
-
-            if (amountToStore > 0) {
-                ItemStack remaining = drop.clone();
-                remaining.setAmount((int) amountToStore);
-                remainingDrops.add(remaining);
+            if (dropItem.getAmount() > 0) {
+                block.getWorld().dropItemNaturally(block.getLocation(), dropItem);
             }
-        }
-
-        if (!remainingDrops.isEmpty()) {
-            addItemsToPlayer(player, remainingDrops);
         }
     }
 
-    private void addItemsToPlayer(Player player, Collection<ItemStack> items) {
-        if (items == null || items.isEmpty()) return;
-        if (player.getInventory().firstEmpty() == -1) {
-            try {
-                ItemStash stash = ItemStash.getInstance();
-                for (ItemStack item : items) {
-                    stash.addItemToStash(player.getUniqueId(), item);
-                }
-            } catch (NoClassDefFoundError e) {
-            }
-        } else {
-            HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(items.toArray(new ItemStack[0]));
-            if (!overflow.isEmpty()) {
-                try {
-                    ItemStash stash = ItemStash.getInstance();
-                    for (ItemStack overflowItem : overflow.values()) {
-                        stash.addItemToStash(player.getUniqueId(), overflowItem);
-                    }
-                } catch (NoClassDefFoundError e) {
-                }
+    private int getEmptySlots(PlayerInventory inventory) {
+        int count = 0;
+        for (ItemStack item : inventory.getStorageContents()) {
+            if (item == null || item.getType() == Material.AIR) {
+                count++;
             }
         }
+        return count;
     }
 }

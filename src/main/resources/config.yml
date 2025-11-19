@@ -8,6 +8,7 @@ drop-settings:
   add-to-inventory: false
   # If "add-to-inventory" is true, drops are priority in StorageBox
   storagebox: false
+  inventory-threshold: 3
 
 ticket:
 - chance: 0.2 # 20% or 1 in 5
