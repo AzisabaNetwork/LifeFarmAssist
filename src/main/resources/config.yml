@@ -50,3 +50,20 @@ list:
   radius: 7
   unfollow-if-full-inventory: true
   # vertical-collect-radius: 0
+- type: drop-boost
+  enabled: false
+  mythic-type: "Drop-boost"
+  # 1.0 = unchanged
+  drop-multiplier: 1.35
+  only-fully-grown: true
+  # Empty list means all crops
+  target-materials:
+    - WHEAT
+    - CARROTS
+    - POTATOES
+    - BEETROOTS
+    - NETHER_WART
+  # WHEAT_SEEDS, BEETROOT_SEEDS are excluded when false
+  include-seeds: false
+  # FLOOR | ROUND | CHANCE
+  rounding-mode: CHANCE

@@ -5,6 +5,7 @@ import net.azisaba.lifefarmassist.config.FarmAssistConfig;
 import net.azisaba.lifefarmassist.listener.AreaBreakListener;
 import net.azisaba.lifefarmassist.listener.AutoGrowArmorListener;
 import net.azisaba.lifefarmassist.listener.AutoPlantArmorListener;
+import net.azisaba.lifefarmassist.listener.DropBoostListener;
 import net.azisaba.lifefarmassist.listener.FarmTicketListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,6 +32,7 @@ public final class LifeFarmAssist extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new AutoPlantArmorListener(this), this);
         Bukkit.getPluginManager().registerEvents(new AutoGrowArmorListener(this), this);
         Bukkit.getPluginManager().registerEvents(new AreaBreakListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new DropBoostListener(this), this);
     }
 
     @Contract(pure = true)
