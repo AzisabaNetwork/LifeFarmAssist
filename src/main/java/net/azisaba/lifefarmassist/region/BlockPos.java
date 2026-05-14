@@ -10,13 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public final class BlockPos {
-    private final World world;
-    private final int x;
-    private final int y;
-    private final int z;
-
-    @Contract("null, _, _, _ -> fail")
+public record BlockPos(World world, int x, int y, int z) {
     public BlockPos(World world, int x, int y, int z) {
         this.world = Objects.requireNonNull(world, "world");
         this.x = x;
@@ -28,21 +22,10 @@ public final class BlockPos {
         this(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
     }
 
+    @Override
     @NotNull
     public World world() {
         return world;
-    }
-
-    public int x() {
-        return x;
-    }
-
-    public int y() {
-        return y;
-    }
-
-    public int z() {
-        return z;
     }
 
     @NotNull
@@ -102,14 +85,8 @@ public final class BlockPos {
     @Override
     public boolean equals(@Nullable Object o) {
         if (this == o) return true;
-        if (!(o instanceof BlockPos)) return false;
-        BlockPos blockPos = (BlockPos) o;
-        return x == blockPos.x && y == blockPos.y && z == blockPos.z && world.equals(blockPos.world);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(world, x, y, z);
+        if (!(o instanceof BlockPos(World world1, int x1, int y1, int z1))) return false;
+        return x == x1 && y == y1 && z == z1 && world.equals(world1);
     }
 
     @Override

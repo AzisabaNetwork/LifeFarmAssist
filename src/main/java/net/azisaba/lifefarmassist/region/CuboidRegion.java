@@ -6,20 +6,19 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class CuboidRegion implements Region {
-    private final BlockPos min;
-    private final BlockPos max;
-
+public record CuboidRegion(BlockPos min, BlockPos max) implements Region {
     public CuboidRegion(@NotNull BlockPos min, @NotNull BlockPos max) {
         this.min = min;
         this.max = max;
     }
 
+    @Override
     @NotNull
     public BlockPos min() {
         return min;
     }
 
+    @Override
     @NotNull
     public BlockPos max() {
         return max;

@@ -65,15 +65,15 @@ public class FarmAssistConfig {
         return allowedWorlds;
     }
 
-    public @NotNull List<@NotNull TicketConfig> getTicket() {
+    public @NotNull List<TicketConfig> getTicket() {
         return ticket;
     }
 
-    public @NotNull List<@NotNull BaseArmorConfig> getList() {
+    public @NotNull List<BaseArmorConfig> getList() {
         return list;
     }
 
-    public <T extends BaseArmorConfig> @NotNull List<@NotNull T> getListOfType(@NotNull Class<T> clazz) {
+    public <T extends BaseArmorConfig> @NotNull List<T> getListOfType(@NotNull Class<T> clazz) {
         return list.stream().filter(clazz::isInstance).map(clazz::cast).collect(Collectors.toList());
     }
 

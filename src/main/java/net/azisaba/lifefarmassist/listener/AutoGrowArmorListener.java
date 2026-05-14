@@ -35,10 +35,9 @@ public class AutoGrowArmorListener extends BaseArmorListener<AutoGrowArmorConfig
                 continue;
             }
             Block block = pos.getBlock();
-            if (!(block.getBlockData() instanceof Ageable)) {
+            if (!(block.getBlockData() instanceof Ageable ageable)) {
                 continue;
             }
-            Ageable ageable = (Ageable) block.getBlockData();
             ageable.setAge(Math.min(ageable.getAge() + 1, ageable.getMaximumAge()));
             block.setBlockData(ageable);
         }

@@ -26,10 +26,9 @@ public class FarmTicketListener implements Listener {
             return;
         }
         BlockData blockData = e.getBlock().getBlockData();
-        if (!(blockData instanceof Ageable)) {
+        if (!(blockData instanceof Ageable ageable)) {
             return;
         }
-        Ageable ageable = (Ageable) blockData;
         if (ageable.getAge() < ageable.getMaximumAge()) return;
         for (TicketConfig config : ticketConfig) {
             if (config.getChance() <= Math.random()) {

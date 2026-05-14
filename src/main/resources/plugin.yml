@@ -1,7 +1,8 @@
 name: LifeFarmAssist
-version: '${project.version}'
+version: @version@
 main: net.azisaba.lifefarmassist.LifeFarmAssist
-api-version: 1.15
-softdepend:
+api-version: 1.21
+depend:
   - MythicMobs
+softdepend:
   - StorageBox
