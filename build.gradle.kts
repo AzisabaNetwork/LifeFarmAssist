@@ -1,7 +1,6 @@
 plugins {
     java
     id("com.gradleup.shadow") version "8.3.0"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21"
 }
 
 group = "net.azisaba"
@@ -28,11 +27,11 @@ repositories {
 }
 
 dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("io.lumine:Mythic-Dist:5.12.0")
     compileOnly("xyz.acrylicstyle:StorageBox:1.5.6")
     compileOnly("net.azisaba:ItemStash:2.2.3")
     compileOnly("org.jetbrains:annotations:23.0.0")
-    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
 }
 
 java {
