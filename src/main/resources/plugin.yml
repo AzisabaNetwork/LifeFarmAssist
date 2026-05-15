@@ -1,5 +1,5 @@
 name: LifeFarmAssist
-version: @version@
+version: '${version}'
 main: net.azisaba.lifefarmassist.LifeFarmAssist
 api-version: 1.21
 depend:
