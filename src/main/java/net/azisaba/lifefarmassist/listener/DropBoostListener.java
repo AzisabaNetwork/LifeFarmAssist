@@ -4,7 +4,7 @@ import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.DropBoostArmorConfig;
 import net.azisaba.lifefarmassist.util.PlayerUtil;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -24,10 +24,10 @@ public class DropBoostListener implements Listener {
         this.configList = plugin.getFarmAssistConfig().getListOfType(DropBoostArmorConfig.class);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW)
     public void onBlockDrop(BlockDropItemEvent e) {
         Player player = e.getPlayer();
-        Block block = e.getBlock();
+        BlockState block = e.getBlockState();
 
         if (!LifeFarmAssist.getInstance().getFarmAssistConfig().isAllowedWorld(block.getWorld().getName())) {
             return;
@@ -68,7 +68,7 @@ public class DropBoostListener implements Listener {
         }
     }
 
-    private boolean isFullyGrown(Block block) {
+    private boolean isFullyGrown(BlockState block) {
         if (!(block.getBlockData() instanceof Ageable)) {
             return false;
         }
