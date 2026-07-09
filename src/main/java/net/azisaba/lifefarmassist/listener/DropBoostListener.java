@@ -2,6 +2,7 @@ package net.azisaba.lifefarmassist.listener;
 
 import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.DropBoostArmorConfig;
+import net.azisaba.lifefarmassist.util.ItemUtil;
 import net.azisaba.lifefarmassist.util.PlayerUtil;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
@@ -37,16 +38,16 @@ public class DropBoostListener implements Listener {
             if (!config.isEnabled()) {
                 continue;
             }
-            if (config.getDropMultiplier() <= 1.0D) {
+            if (config.getMaxAdditionalDropMultiplier() <= 1.0D) {
                 continue;
             }
             if (!PlayerUtil.wearingMythicItem(player, config.getMythicType())) {
                 continue;
             }
-            if (!config.isTargetMaterial(block.getType())) {
+            if (config.getTargetMaterial() != block.getType()) {
                 continue;
             }
-            if (config.isOnlyFullyGrown() && !isFullyGrown(block)) {
+            if (!isFullyGrown(block)) {
                 continue;
             }
 
@@ -59,7 +60,8 @@ public class DropBoostListener implements Listener {
                     continue;
                 }
 
-                int boosted = applyMultiplier(stack.getAmount(), config.getDropMultiplier(), config.getRoundingMode());
+                int breakCount = ItemUtil.getBreakCount(stack);
+                int boosted = applyMultiplier(stack.getAmount(), 1 + config.getAdditionalDropMultiplier(breakCount), config.getRoundingMode());
                 if (boosted > stack.getAmount()) {
                     stack.setAmount(boosted);
                     item.setItemStack(stack);

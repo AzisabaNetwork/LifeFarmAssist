@@ -53,8 +53,8 @@ list:
 - type: drop-boost
   enabled: false
   mythic-type: "Drop-boost"
-  # 1.0 = unchanged
-  drop-multiplier: 1.35
+  # Defines the max "additional" drop multiplier. If you want to set it to be +100%, you should set this property to 1.
+  max-drop-multiplier: 1.35
   only-fully-grown: true
   # Empty list means all crops
   target-materials:
