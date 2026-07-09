@@ -4,6 +4,7 @@ import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.DropBoostArmorConfig;
 import net.azisaba.lifefarmassist.util.ItemUtil;
 import net.azisaba.lifefarmassist.util.PlayerUtil;
+import net.azisaba.lifefarmassist.util.ReplaceableIterator;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Ageable;
@@ -14,6 +15,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -38,13 +41,24 @@ public class DropBoostListener implements Listener {
             if (!config.isEnabled()) {
                 continue;
             }
-            if (config.getMaxAdditionalDropMultiplier() <= 1.0D) {
+            if (config.getMaxAdditionalDropMultiplier() <= 0.0D) {
                 continue;
             }
             if (!PlayerUtil.wearingMythicItem(player, config.getMythicType())) {
                 continue;
             }
             if (config.getTargetMaterial() != block.getType()) {
+                continue;
+            }
+            int breakCount = 0;
+            for (@NotNull ReplaceableIterator<@Nullable ItemStack> it = PlayerUtil.getArmors(player); it.hasNext();) {
+                ItemStack armor = it.next();
+                if (config.getMythicType().equals(ItemUtil.getMythicType(armor))) {
+                    breakCount = ItemUtil.getBreakCount(armor);
+                    break;
+                }
+            }
+            if (breakCount == 0) {
                 continue;
             }
             if (!isFullyGrown(block)) {
@@ -60,7 +74,6 @@ public class DropBoostListener implements Listener {
                     continue;
                 }
 
-                int breakCount = ItemUtil.getBreakCount(stack);
                 int boosted = applyMultiplier(stack.getAmount(), 1 + config.getAdditionalDropMultiplier(breakCount), config.getRoundingMode());
                 if (boosted > stack.getAmount()) {
                     stack.setAmount(boosted);

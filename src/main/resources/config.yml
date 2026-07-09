@@ -55,14 +55,8 @@ list:
   mythic-type: "Drop-boost"
   # Defines the max "additional" drop multiplier. If you want to set it to be +100%, you should set this property to 1.
   max-drop-multiplier: 1.35
-  only-fully-grown: true
-  # Empty list means all crops
-  target-materials:
-    - WHEAT
-    - CARROTS
-    - POTATOES
-    - BEETROOTS
-    - NETHER_WART
+  # Possible types: WHEAT, CARROTS, POTATOES, BEETROOTS, NETHER_WART
+  target-material: CARROTS
   # WHEAT_SEEDS, BEETROOT_SEEDS are excluded when false
   include-seeds: false
   # FLOOR | ROUND | CHANCE
