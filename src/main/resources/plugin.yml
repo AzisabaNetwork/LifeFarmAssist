@@ -5,3 +5,13 @@ api-version: 1.15
 softdepend:
   - MythicMobs
   - StorageBox
+commands:
+  lifefarmassist:
+    description: LifeFarmAssistの管理コマンド
+    usage: /<command> <give|edit-drop-boost>
+    permission: lifefarmassist.command
+    permission-message: このコマンドを実行する権限がありません。
+permissions:
+  lifefarmassist.command:
+    description: LifeFarmAssistの管理コマンドを使用できます
+    default: op

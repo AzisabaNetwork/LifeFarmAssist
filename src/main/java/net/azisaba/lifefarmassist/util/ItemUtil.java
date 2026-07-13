@@ -4,11 +4,11 @@ import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.DropBoostArmorConfig;
 import net.minecraft.server.v1_15_R1.NBTTagCompound;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +50,19 @@ public class ItemUtil {
         return i == null ? 0 : i;
     }
 
-    public static @Nullable ItemStack incrementBreakCount(@Nullable ItemStack item) {
+    public static @Nullable ItemStack createDropBoostItem(@NotNull Material material, @NotNull String mythicType) {
+        if (material.isAir() || !material.isItem() || getDropBoostConfig(mythicType) == null) {
+            return null;
+        }
+
+        net.minecraft.server.v1_15_R1.ItemStack nms = CraftItemStack.asNMSCopy(new ItemStack(material));
+        NBTTagCompound tag = nms.getOrCreateTag();
+        tag.setString("MYTHIC_TYPE", mythicType);
+        nms.setTag(tag);
+        return setBreakCount(CraftItemStack.asBukkitCopy(nms), 0);
+    }
+
+    public static @Nullable ItemStack setBreakCount(@Nullable ItemStack item, int breakCount) {
         if (item == null || item.getType().isAir() || !item.hasItemMeta()) {
             return null;
         }
@@ -62,18 +74,13 @@ public class ItemUtil {
         if (mythicType == null) {
             return null;
         }
-        DropBoostArmorConfig config = null;
-        for (DropBoostArmorConfig element : LifeFarmAssist.getInstance().getFarmAssistConfig().getListOfType(DropBoostArmorConfig.class)) {
-            if (element.getMythicType().equals(mythicType)) {
-                config = element;
-                break;
-            }
+        DropBoostArmorConfig config = getDropBoostConfig(mythicType);
+        if (config == null) {
+            return null;
         }
-        if (config == null) return null;
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        Integer currentRaw = pdc.get(getBreakCountKey(), PersistentDataType.INTEGER);
-        int current = currentRaw == null ? 0 : currentRaw;
-        pdc.set(getBreakCountKey(), PersistentDataType.INTEGER, Math.min(config.getMaxRequiredBreakCount(), ++current));
+
+        int current = Math.max(0, Math.min(config.getMaxRequiredBreakCount(), breakCount));
+        meta.getPersistentDataContainer().set(getBreakCountKey(), PersistentDataType.INTEGER, current);
         ChatColor color = getColorForBreakCount(config.getMaxRequiredBreakCount(), current);
         meta.setDisplayName(ChatColor.GOLD + "[農業] " + color + "ドロップ増加");
         meta.setLore(Arrays.asList(
@@ -89,7 +96,23 @@ public class ItemUtil {
         return item;
     }
 
+    public static @Nullable ItemStack incrementBreakCount(@Nullable ItemStack item) {
+        return item == null ? null : setBreakCount(item, getBreakCount(item) + 1);
+    }
+
+    private static @Nullable DropBoostArmorConfig getDropBoostConfig(@NotNull String mythicType) {
+        for (DropBoostArmorConfig config : LifeFarmAssist.getInstance().getFarmAssistConfig().getListOfType(DropBoostArmorConfig.class)) {
+            if (config.getMythicType().equals(mythicType)) {
+                return config;
+            }
+        }
+        return null;
+    }
+
     private static ChatColor getColorForBreakCount(int max, int current) {
+        if (max <= 0) {
+            return ChatColor.GOLD;
+        }
         double d = current / (double) max;
         if (d >= 1) {
             return ChatColor.GOLD;
