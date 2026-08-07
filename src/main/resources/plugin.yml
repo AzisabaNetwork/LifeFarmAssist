@@ -6,3 +6,13 @@ depend:
   - MythicMobs
 softdepend:
   - StorageBox
+commands:
+  lifefarmassist:
+    description: LifeFarmAssist management command
+    usage: /<command> <give|edit-drop-boost>
+    permission: lifefarmassist.command
+    permission-message: You do not have permission to use this command.
+permissions:
+  lifefarmassist.command:
+    description: Allows use of the LifeFarmAssist management command.
+    default: op

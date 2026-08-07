@@ -23,6 +23,7 @@ public class FarmAssistConfig {
                             .put(AutoGrowArmorConfig.TYPE, AutoGrowArmorConfig::new)
                             .put(AreaBreakArmorConfig.TYPE, AreaBreakArmorConfig::new)
                             .put(AreaCollectArmorConfig.TYPE, AreaCollectArmorConfig::new)
+                            .put(DropBoostArmorConfig.TYPE, DropBoostArmorConfig::new)
                             .build()
             );
     private final boolean allowedOnAllWorlds;

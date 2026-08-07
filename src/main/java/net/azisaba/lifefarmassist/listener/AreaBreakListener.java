@@ -1,12 +1,13 @@
 package net.azisaba.lifefarmassist.listener;
 
-import net.azisaba.itemstash.ItemStash;
 import net.azisaba.lifefarmassist.LifeFarmAssist;
 import net.azisaba.lifefarmassist.config.AreaBreakArmorConfig;
 import net.azisaba.lifefarmassist.region.BlockPos;
 import net.azisaba.lifefarmassist.region.CuboidRegion;
 import net.azisaba.lifefarmassist.region.Region;
+import net.azisaba.lifefarmassist.util.ItemUtil;
 import net.azisaba.lifefarmassist.util.PlayerUtil;
+import net.azisaba.lifefarmassist.util.ReplaceableIterator;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -19,6 +20,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import xyz.acrylicstyle.storageBox.utils.StorageBox;
 import xyz.acrylicstyle.storageBox.utils.StorageBoxUtils;
 
@@ -49,6 +51,17 @@ public class AreaBreakListener implements Listener {
             // prevent loop
             return;
         }
+
+        // TODO: move this elsewhere?
+        ReplaceableIterator<ItemStack> iterator = PlayerUtil.getArmors(e.getPlayer());
+        while (iterator.hasNext()) {
+            ItemStack item = iterator.next();
+            ItemStack newItem = ItemUtil.incrementBreakCount(item);
+            if (newItem != null) {
+                iterator.replace(newItem);
+            }
+        }
+
         int delay = 0;
         for (AreaBreakArmorConfig config : configList) {
             if (!config.isEnabled() || config.getRadius() == 0 || delay > 0) continue;
