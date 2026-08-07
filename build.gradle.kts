@@ -1,10 +1,9 @@
 plugins {
     java
-    id("com.gradleup.shadow") version "8.3.0"
 }
 
 group = "net.azisaba"
-version = "2.0.6+1.21.11"
+version = "2.0.7+1.21.11"
 
 repositories {
     mavenCentral()
@@ -50,13 +49,5 @@ tasks {
         filesMatching("plugin.yml") {
             expand(props)
         }
-    }
-
-    shadowJar {
-        archiveClassifier.set("")
-    }
-
-    build {
-        dependsOn(shadowJar)
     }
 }
